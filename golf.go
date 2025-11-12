@@ -134,7 +134,7 @@ func main() {
 
 	w.Resize(fyne.NewSize(400, 200))
 
-	membership.AddUsers(registrar.ReadJSON("test2.json"))
+	membership.AddUsers(registrar.ReadJSON("test.json"))
 	fmt.Println(membership.GetUsers())
 
 	w.SetContent(appContainers["content"])

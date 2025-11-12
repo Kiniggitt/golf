@@ -14,7 +14,7 @@ func ReadJSON(fileName string) []*membership.User {
 }
 
 func WriteJSON(fileName string, users []*membership.User) error {
-	output, err := json.Marshal(users)
+	output, err := json.MarshalIndent(users, "", "    ")
 	if err == nil {
 		os.WriteFile(fileName, output, 0644)
 	} else {

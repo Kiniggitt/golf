@@ -5,26 +5,53 @@ import (
 	"strings"
 )
 
+type Fee struct {
+	Amount float64
+	Reason string
+	Paid   bool
+}
+
+func NewFee(amt float64, reason string) (f Fee) {
+	f.Amount = amt
+	f.Reason = reason
+	f.Paid = false
+	return
+}
+
 type User struct {
 	Username string
 	First    string
 	Last     string
 	Suffix   string
 	Address  string
-	balance  float64
-	fees     float64
+	Balance  float64
+	Fees     []Fee
 }
 
 func (u *User) GetBalance() string {
-	return fmt.Sprintf("$%.2f", u.balance)
+	balance := u.Balance
+	for _, fee := range u.Fees {
+		if !fee.Paid {
+			balance += fee.Amount
+		}
+	}
+	return fmt.Sprintf("$%.2f", balance)
 }
 
 func (u *User) GetFees() string {
-	return fmt.Sprintf("$%.2f", u.fees)
+	fees := make([]string, 0)
+	for _, fee := range u.Fees {
+		fees = append(fees, fmt.Sprintf("%s - $%.2f", fee.Reason, fee.Amount))
+	}
+	return strings.Join(fees, "\n")
 }
 
 func (u *User) GetName() string {
 	return fmt.Sprintf("%s %s %s", trim(u.First), trim(u.Last), trim(u.Suffix))
+}
+
+func (u *User) AddFee(amt float64, reason string) {
+	u.Fees = append(u.Fees, NewFee(amt, reason))
 }
 
 func trim(s string) string {
@@ -72,7 +99,7 @@ func (user *User) getNewUsername() string {
 }
 
 func (user User) String() string {
-	return fmt.Sprintf("username: %s\nfirstname: %s\nlastname: %s\nbalance: $%.2f", user.Username, user.First, user.Last, user.balance)
+	return fmt.Sprintf("username: %s\nfirstname: %s\nlastname: %s\nbalance: $%.2f", user.Username, user.First, user.Last, user.Balance)
 }
 
 func NewUser(name, address string) (user User) {
@@ -81,8 +108,9 @@ func NewUser(name, address string) (user User) {
 	user.Username = username
 	idMap[username] = &user
 	user.Address = address
-	user.fees = 0
-	user.balance = 0
+	user.Fees = make([]Fee, 0)
+	user.AddFee(10.00, "New account fee")
+	user.Balance = 0
 	return user
 }
 
@@ -111,7 +139,6 @@ func UsernameExists(str string) bool {
 }
 
 func GetUser(str string) (*User, bool) {
-	fmt.Println("Get user", str)
 	user, ok := idMap[str]
 	return user, ok
 }
